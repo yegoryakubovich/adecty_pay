@@ -23,5 +23,5 @@ config.read('config.ini')
 
 config_main = config['main']
 
-IS_FEXPS = config_main.get('is_fexps')
+IS_FEXPS = True if config_main.get('is_fexps') == 'True' else False
 URL = config_main.get('url')

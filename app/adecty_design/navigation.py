@@ -30,7 +30,7 @@ navigation_main = Navigation(
         NavigationItem(
             id='wallet_offers',
             name='My Offers',
-            url='/wallet/offers',
+            url='/wallet/offers/get',
             icon=Icon(path='app/icons/wallet_offers.svg')
         ),
         NavigationItem(

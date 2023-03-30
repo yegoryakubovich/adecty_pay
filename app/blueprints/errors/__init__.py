@@ -15,7 +15,7 @@
 #
 
 
-from flask import Blueprint
+from flask import Blueprint, redirect
 from werkzeug.exceptions import InternalServerError
 
 
@@ -24,4 +24,4 @@ blueprint_errors = Blueprint('blueprint_errors', __name__)
 
 @blueprint_errors.app_errorhandler(404)
 def errors_404(error: InternalServerError):
-    return 'Not found', 404
+    return redirect(location='/wallet/all')

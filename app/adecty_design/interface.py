@@ -23,6 +23,7 @@ from app.adecty_design.colors import colors
 from app.adecty_design.navigation import navigation_main
 from config import IS_FEXPS
 
+
 interface = Interface(
     logo=Icon(path='app/icons/{filename}.svg'.format(filename='logo' if not IS_FEXPS else 'fexps_logo')),
     logo_mini=Icon(path='app/icons/logo_mini.svg'),
@@ -30,8 +31,13 @@ interface = Interface(
     colors=colors,
     font=Font(
         css='\'Montserrat\', sans-serif',
-        html_init='<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">',
-        css_init="@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');",
+        html_init='<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" '
+                  'href="https://fonts.gstatic.com" crossorigin>'
+                  '<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;'
+                  '0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" '
+                  'rel="stylesheet">',
+        css_init="@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;"
+                 "0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');",
     ),
     rounding=4,
     navigation=navigation_main,

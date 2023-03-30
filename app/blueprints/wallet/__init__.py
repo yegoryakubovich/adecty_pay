@@ -14,17 +14,22 @@
 # limitations under the License.
 #
 
+
 from flask import Blueprint
 
 from adecty_design.properties import Font, Margin, Padding
 from adecty_design.widgets import Text, Card, View, Button, ViewType, ButtonType
 from app.adecty_design import colors, interface
 from app.blueprints.wallet.create import blueprint_wallet_create
+from app.blueprints.wallet.offer import blueprint_wallet_offer
+from app.blueprints.wallet.offers import blueprint_wallet_offers
 from app.functions.data_input import data_input
 
 
 blueprint_wallet = Blueprint('blueprint_wallet', __name__, url_prefix='/wallet')
 blueprint_wallet.register_blueprint(blueprint=blueprint_wallet_create)
+blueprint_wallet.register_blueprint(blueprint=blueprint_wallet_offers)
+blueprint_wallet.register_blueprint(blueprint=blueprint_wallet_offer)
 
 
 @blueprint_wallet.route('/<deals_type>', endpoint='wallet_get', methods=('GET',))
@@ -43,7 +48,7 @@ def wallet_get(account_session_token, wallet, deals_type):
         ),
         Card(widgets=[
             Text(
-                text='$ {balance}'.format(balance=balance),
+                text='${balance:.2f}'.format(balance=balance/100),
                 font=Font(
                     size=32,
                     weight=700,
@@ -72,6 +77,10 @@ def wallet_get(account_session_token, wallet, deals_type):
                 text='Выводы',
                 font=Font(color=colors.background if deals_type == 'output' else colors.text),
             ), color_background=colors.primary if deals_type == 'output' else colors.background_secondary),
+            Button(type=ButtonType.chip, url='security', margin=Margin(right=8), text=Text(
+                text='Безопасность',
+                font=Font(color=colors.background if deals_type == 'security' else colors.text),
+            ), color_background=colors.primary if deals_type == 'security' else colors.background_secondary),
             Button(type=ButtonType.chip, url='all', text=Text(
                 text='Все',
                 font=Font(color=colors.background if deals_type == 'all' else colors.text),

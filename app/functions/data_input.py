@@ -19,9 +19,12 @@ from flask import request, redirect
 
 from adecty_api_client.adecty_api_client_error import AdectyApiClientError
 from app.adecty_api_client import adecty_api_client
+from config import URL
 
 
-ACCOUNT_SESSION_TOKEN_GET_URL = 'https://account.adecty.com/account/session/token/get?redirect_url=192.168.100.230:5000'
+ACCOUNT_SESSION_TOKEN_GET_URL = 'https://account.adecty.com/account/session/token/get?redirect_url={url}'.format(
+    url=URL,
+)
 
 
 def data_input(schema: dict):
