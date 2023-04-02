@@ -15,17 +15,16 @@
 #
 
 
-from flask import Blueprint, redirect, request
+from flask import Blueprint, request
 
-from adecty_api_client.adecty_api_client_error import AdectyApiClientError
-from adecty_design.properties import Font, Margin, Padding, Align, AlignType
-from adecty_design.widgets import Text, Button, View, ViewType, ButtonType, Card, Dictionary, Form, InputSelect, \
-    InputButton, InputFile, InputText
+from adecty_design.properties import Font, Margin
+from adecty_design.widgets import Text, Button, View, ViewType, ButtonType, Form, InputSelect, \
+    InputButton, InputText
 from adecty_design.widgets.icon import Icon
 from app.adecty_api_client import adecty_api_client
 from app.adecty_design import colors, interface
-from app.adecty_design.navigation import navigation_none
 from app.functions.data_input import data_input
+from app.functions.to_amount import to_amount, AmountType
 
 
 blueprint_wallet_offer = Blueprint('blueprint_wallet_offer', __name__, url_prefix='/offer')
@@ -34,18 +33,78 @@ blueprint_wallet_offer = Blueprint('blueprint_wallet_offer', __name__, url_prefi
 @blueprint_wallet_offer.route(rule='/create', endpoint='wallet_offer_create', methods=('GET', 'POST'))
 @data_input({'account_session_token': True, 'wallet': True})
 def wallet_offer_create(account_session_token, wallet):
-    form_widgets = []
+    types = {'input': 'Пополнение кошелька', 'output': 'Вывод с кошелька'}
+    currencies = adecty_api_client.pay.currencies.get()['currencies']
+    currencies_descriptions = [currency['description'] for currency in currencies]
+    systems = []
+    sysyems_descriptions = []
 
-    offer_type = request.form.get('offer_type')
-    offer_currency = request.form.get('offer_currency')
-    offer_system_description = request.form.get('offer_system_description')
-    offer_value_from = request.form.get('offer_value_from')
-    offer_value_to = request.form.get('offer_value_to')
-    offer_rate = request.form.get('offer_rate')
+    # Form data
+    offer_type_str = request.form.get('offer_type')
+    offer_type = None
+    offer_currency_name_str = request.form.get('offer_currency')
+    offer_currency_name = None
+    offer_currency_places_decimal = None
+    offer_value_from_str = request.form.get('offer_value_from')
+    offer_value_from = None
+    offer_value_to_str = request.form.get('offer_value_to')
+    offer_value_to = None
+    offer_rate_str = request.form.get('offer_rate')
+    offer_rate = None
+    offer_system_str = request.form.get('offer_system_description')
+    offer_system = None
 
-    form_widgets += [
+    if offer_type_str:
+        offer_type = [name for name, value in types.items() if value == offer_type_str][0]
+    if offer_currency_name_str:
+        offer_currency_name, offer_currency_places_decimal = [(currency['name'], currency['places_decimal'])
+                                                              for currency in currencies
+                                                              if currency['description'] == offer_currency_name_str][0]
+        systems = adecty_api_client.pay.systems.get(currency_name=offer_currency_name)['systems']
+        sysyems_descriptions = [system['description'] for system in systems]
+    if offer_value_from_str:
+        offer_value_from = to_amount(
+            amount=offer_value_from_str,
+            places_decimal=offer_currency_places_decimal,
+            amount_type=AmountType.integer,
+        )
+        offer_value_from_str = to_amount(
+            amount=offer_value_from_str,
+            places_decimal=offer_currency_places_decimal,
+            amount_type=AmountType.string,
+        )
+    if offer_value_to_str:
+        offer_value_to = to_amount(
+            amount=offer_value_to_str,
+            places_decimal=offer_currency_places_decimal,
+            amount_type=AmountType.integer,
+        )
+        offer_value_to_str = to_amount(
+            amount=offer_value_to_str,
+            places_decimal=offer_currency_places_decimal,
+            amount_type=AmountType.string,
+        )
+    if offer_rate_str:
+        offer_rate = to_amount(
+            amount=offer_rate_str,
+            places_decimal=offer_currency_places_decimal,
+            amount_type=AmountType.integer,
+        )
+        offer_rate_str = to_amount(
+            amount=offer_rate_str,
+            places_decimal=offer_currency_places_decimal,
+            amount_type=AmountType.string,
+        )
+    if offer_system_str:
+        offer_system = [
+            system
+            for system in systems
+            if system['description'] == offer_system_str
+        ][0]
+
+    form_widgets = [
         Text(
-            text='1. Тип предложения',
+            text='1. Формат предложения',
             font=Font(
                 size=22,
                 weight=500,
@@ -54,14 +113,13 @@ def wallet_offer_create(account_session_token, wallet):
         ),
         InputSelect(
             id='offer_type',
-            options=[
-                'INPUT', 'OUTPUT',
-            ],
+            options=[t for t in types.values()],
             margin=Margin(horizontal=12),
             is_disabled=True if offer_type else False,
-            selected=offer_type,
+            selected=offer_type_str,
         ),
     ]
+
     if offer_type:
         form_widgets += [
             Text(
@@ -74,21 +132,17 @@ def wallet_offer_create(account_session_token, wallet):
             ),
             InputSelect(
                 id='offer_currency',
-                options=[
-                    'RUB', 'USD',
-                ],
+                options=currencies_descriptions,
                 margin=Margin(horizontal=12),
-                is_disabled=True if offer_currency else False,
-                selected=offer_currency,
+                is_disabled=True if offer_currency_name_str else False,
+                selected=offer_currency_name_str,
             ),
         ]
 
-    if offer_currency:
-        systems = adecty_api_client.pay.systems.get(currency_name=offer_currency)['systems']
-
+    if offer_currency_name_str:
         form_widgets += [
             Text(
-                text='3. Способ получения {}'.format(offer_currency),
+                text='3. Способ получения {}'.format(offer_currency_name_str),
                 font=Font(
                     size=22,
                     weight=500,
@@ -97,14 +151,14 @@ def wallet_offer_create(account_session_token, wallet):
             ),
             InputSelect(
                 id='offer_system_description',
-                options=[system['description'] for system in systems],
+                options=sysyems_descriptions,
                 margin=Margin(horizontal=12),
-                is_disabled=True if offer_system_description else False,
-                selected=offer_system_description,
+                is_disabled=True if offer_system_str else False,
+                selected=offer_system_str,
             ),
         ]
 
-    if offer_system_description:
+    if offer_system_str:
         form_widgets += [
             Text(
                 text='4. Сколько вы готовы {} (указывается в USD)'
@@ -121,11 +175,11 @@ def wallet_offer_create(account_session_token, wallet):
                     size=16,
                     weight=400,
                 ),
-                margin=Margin(down=4),
+                margin=Margin(top=12, down=4),
             ),
             InputText(
                 id='offer_value_from',
-                value=offer_value_from,
+                value=offer_value_from_str,
                 margin=Margin(down=12),
                 is_disabled=True if offer_value_from else False,
             ),
@@ -139,7 +193,7 @@ def wallet_offer_create(account_session_token, wallet):
             ),
             InputText(
                 id='offer_value_to',
-                value=offer_value_to,
+                value=offer_value_to_str,
                 margin=Margin(down=12),
                 is_disabled=True if offer_value_to else False,
             ),
@@ -148,7 +202,7 @@ def wallet_offer_create(account_session_token, wallet):
     if offer_value_from and offer_value_to:
         form_widgets += [
             Text(
-                text='6. Количество {currency} за 1 USD (курс)'.format(currency=offer_currency),
+                text='6. Количество {currency} за 1 USD (курс)'.format(currency=offer_currency_name_str),
                 font=Font(
                     size=22,
                     weight=500,
@@ -157,11 +211,41 @@ def wallet_offer_create(account_session_token, wallet):
             ),
             InputText(
                 id='offer_rate',
-                value=offer_rate,
+                value=offer_rate_str,
                 margin=Margin(horizontal=12),
                 is_disabled=True if offer_rate else False,
             ),
         ]
+
+    if offer_rate:
+        system_data = offer_system['data']
+        form_widgets += [
+            Text(
+                text='7. Реквизиты',
+                font=Font(
+                    size=22,
+                    weight=500,
+                ),
+                margin=Margin(top=12, down=8),
+            ),
+        ]
+        for field in system_data:
+            form_widgets += [
+                Text(
+                    text=field['description'],
+                    font=Font(
+                        size=16,
+                        weight=400,
+                    ),
+                    margin=Margin(down=4),
+                ),
+                InputText(
+                    id=field['name'],
+                    value=offer_value_to_str,
+                    margin=Margin(down=12),
+                    is_disabled=True if offer_value_to else False,
+                ),
+            ]
 
     form_widgets.append(
         InputButton(text='Продолжить'),

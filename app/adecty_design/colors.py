@@ -18,6 +18,7 @@
 from adecty_design.properties.colors import Colors
 from config import IS_FEXPS
 
+
 colors = Colors(
     background='#fff',
     background_secondary='#d1d1d1',
@@ -30,7 +31,7 @@ colors = Colors(
     unselected='#fff',
 ) if not IS_FEXPS else Colors(
     background='#181818',
-    background_secondary='#2e2e2e',
+    background_secondary='#383838',
     negative='#ed7474',
     positive='#a9ffa3',
     primary='#fffc5a',
