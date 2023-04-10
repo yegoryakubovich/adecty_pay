@@ -15,7 +15,7 @@
 #
 
 
-from flask import Blueprint
+from flask import Blueprint, redirect
 
 from adecty_design.properties import Font, Margin, Padding, Align, AlignType
 from adecty_design.widgets import Text, Button, View, ViewType, ButtonType, Card, Dictionary
@@ -57,48 +57,60 @@ def wallet_offers_get(account_session_token, wallet):
         )
     ]
     for offer in wallet_offers:
-        widgets.append(Card(widgets=[
-            Text(
-                text='{system_name}'.format(
-                    system_name=offer['system']['description'],
-                ),
-                font=Font(
-                    size=22,
-                    weight=500,
-                ),
-            ),
-            Dictionary(
-                margin=Margin(horizontal=8),
-                keys=['Количество', 'Курс', 'Активно до'],
-                values=[
-                    '{value_from} - {value_to} USD'.format(
-                        value_from=offer['value_from'] / 100,
-                        value_to=offer['value_to'] / 100,
-                        currency=offer['system']['currency']['name']
+        widgets.append(Card(
+            widgets=[
+                Text(
+                    text='{system_name}'.format(
+                        system_name=offer['system']['description'],
                     ),
-                    '{rate} {currency} за 1 USD'.format(
-                        rate=offer['rate'] / 100,
-                        currency=offer['system']['currency']['name'],
+                    font=Font(
+                        size=22,
+                        weight=500,
                     ),
-                    '{updated_datetime}'.format(updated_datetime=offer['updated_datetime'])
-                ],
+                ),
+                Dictionary(
+                    margin=Margin(horizontal=12),
+                    keys=['Количество', 'Курс', 'Активно до'],
+                    values=[
+                        '{value_from} - {value_to} USD'.format(
+                            value_from=offer['value_from'] / 100,
+                            value_to=offer['value_to'] / 100,
+                        ),
+                        '{rate} {currency} за 1 USD'.format(
+                            rate=offer['rate'] / 100,
+                            currency=offer['system']['currency']['description'],
+                        ),
+                        '{updated_datetime}'.format(updated_datetime=offer['updated_datetime'])
+                    ],
 
-            ),
-            View(type=ViewType.horizontal, widgets=[
-                Button(
-                    type=ButtonType.chip,
-                    text='Редактировать',
-                    url='/1', icon=Icon(path='app/icons/edit.svg', color=colors.text),
                 ),
-                Button(
-                    type=ButtonType.chip,
-                    text='Продлить',
-                    url='/1',
-                    icon=Icon(path='app/icons/update.svg', color=colors.background),
-                    color_background=colors.positive),
-            ]),
-        ],
-            margin=Margin(horizontal=12, ), padding=Padding(vertical=24, horizontal=18)
+                View(
+                    type=ViewType.horizontal,
+                    widgets=[
+                        Button(
+                            type=ButtonType.chip,
+                            text='Редактировать',
+                            url='/wallet/offer/{offer_id}/update'.format(
+                                offer_id=offer['id'],
+                            ),
+                            icon=Icon(path='app/icons/edit.svg', color=colors.text),
+                            color_background=colors.background,
+                        ),
+                        Button(
+                            type=ButtonType.chip,
+                            text='Продлить',
+                            url='/wallet/offer/{offer_id}/update/active'.format(
+                                offer_id=offer['id'],
+                            ),
+                            icon=Icon(path='app/icons/update.svg', color=colors.background),
+                            color_background=colors.positive,
+                        ),
+                    ],
+                 ),
+            ],
+            margin=Margin(horizontal=12, ),
+            padding=Padding(vertical=24, horizontal=18),
+            color_background=colors.background_secondary,
         ))
 
     interface_html = interface.html_get(widgets=widgets, active='wallet_offers')

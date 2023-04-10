@@ -26,6 +26,6 @@ def account_session_token_save():
     account_session_token = request.args.get('account_session_token')
 
     response = redirect(location='/wallet/all')
-    response.set_cookie(key='account_session_token', value=account_session_token, max_age=60*60*7)
+    response.set_cookie(key='account_session_token', value=account_session_token, max_age=60*60*24*7)
 
     return response

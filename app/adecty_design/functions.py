@@ -20,7 +20,12 @@ from adecty_design.widgets import Card, Text
 from app.adecty_design import colors
 
 
-def message_error_get(text):
+class MessageType:
+    error = 'error'
+    succesfull = 'succesfull'
+
+
+def message_get(text, type=MessageType.error):
     message = Card(widgets=[
         Text(
             text=text,
@@ -30,5 +35,5 @@ def message_error_get(text):
                 color=colors.background,
             ),
         )
-    ], color_background=colors.negative, margin=Margin(down=12))
+    ], color_background=colors.negative if type == MessageType.error else colors.positive, margin=Margin(down=12))
     return message
